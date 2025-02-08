@@ -1,7 +1,7 @@
 <table>
   <tr>
     <td width="160px">
-      <img src="profile.jpg" width="150px" style="border-radius: 10px;">
+      <img src="me.jpg" width="150px" style="border-radius: 10px;">
     </td>
     <td>
       <h2>Могилевцев Дмитрий</h2>
