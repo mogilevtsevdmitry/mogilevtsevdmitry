@@ -5,11 +5,11 @@
     </td>
     <td>
       <h2>Могилевцев Дмитрий</h2>
-      🚀 <strong>Backend-разработчик Node.js | NestJS</strong>  
-      📍 <strong>Тюмень, Россия</strong>  
-      📧 <a href="mailto:webmogilevtsev@ya.ru">webmogilevtsev@ya.ru</a>  
-      💬 <a href="https://t.me/mogilevtsevdmitry">@mogilevtsevdmitry</a>  
-      🔗 <a href="https://github.com/mogilevtsevdmitry">GitHub</a>  
+      🚀 <strong>Backend-разработчик Node.js | NestJS</strong><br/>
+      📍 <strong>Тюмень, Россия</strong><br/>
+      <img src="https://github.com/user-attachments/assets/9054638d-8b56-43c2-b094-f8e29f4a187c" width="15px">&nbsp;&nbsp;<a href="mailto:webmogilevtsev@ya.ru">webmogilevtsev@ya.ru</a><br/>
+      <img src="https://github.com/user-attachments/assets/4c52b3cc-eaad-4380-ad77-9dfba788260a" width="15px">&nbsp;&nbsp;<a href="https://t.me/mogilevtsevdmitry">@mogilevtsevdmitry</a><br/>
+      <img src="https://github.com/user-attachments/assets/86bef0bd-5781-46cc-818f-3e365b5f2fef" width="15px">&nbsp;&nbsp;<a href="https://github.com/mogilevtsevdmitry">GitHub</a>
     </td>
   </tr>
 </table>
