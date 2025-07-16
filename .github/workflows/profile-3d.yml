@@ -8,7 +8,7 @@ on:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
@@ -21,13 +21,13 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgbm-dev
-          npm install puppeteer
+          sudo apt-get install -y libgbm-dev libxshmfence-dev libglu1-mesa-dev
+          npm install puppeteer@19.11.1  # Версия с лучшей WebGL поддержкой
 
       - name: Create assets directory
         run: mkdir -p assets
 
-      - name: Take screenshot
+      - name: Take screenshot with WebGL
         run: |
           node -e "
           const puppeteer = require('puppeteer');
@@ -38,31 +38,42 @@ jobs:
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu',
+                '--use-gl=egl',  # Критически важно для WebGL
+                '--enable-webgl',
+                '--enable-accelerated-2d-canvas',
+                '--enable-gpu-rasterization',
+                '--ignore-gpu-blocklist',
                 '--window-size=1400,800'
-              ]
+              ],
+              env: {
+                DISPLAY: ':99'  # Необходимо для GPU-рендеринга
+              }
             });
             
             try {
               const page = await browser.newPage();
               await page.setViewport({ width: 1400, height: 800 });
               
-              console.log('Navigating to Skyline...');
+              console.log('Loading Skyline...');
               await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=false&autoRotate=false', {
                 waitUntil: 'networkidle2',
-                timeout: 90000
+                timeout: 120000
               });
               
-              console.log('Waiting for canvas...');
-              await page.waitForSelector('canvas', { timeout: 90000 });
-              await new Promise(resolve => setTimeout(resolve, 20000));
+              console.log('Waiting for WebGL initialization...');
+              await page.waitForFunction(() => {
+                const canvas = document.querySelector('canvas');
+                return canvas && canvas.getContext('webgl');
+              }, { timeout: 120000 });
               
-              console.log('Taking screenshot...');
+              console.log('Additional rendering time...');
+              await new Promise(resolve => setTimeout(resolve, 30000));
+              
+              console.log('Capturing screenshot...');
               await page.screenshot({
                 path: 'assets/skyline.png',
                 type: 'png',
-                clip: { x: 0, y: 0, width: 1400, height: 800 },
-                omitBackground: true
+                clip: { x: 0, y: 0, width: 1400, height: 800 }
               });
               
             } finally {
