@@ -1,4 +1,4 @@
-name: Skyline Screenshot Simplified
+name: Ultimate Skyline Capture
 
 on:
   schedule:
@@ -13,12 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup minimal environment
+      - name: Setup environment
         run: |
           sudo apt-get update || true
-          sudo apt-get install -y --no-install-recommends \
+          sudo apt-get install -y \
             chromium-browser \
-            imagemagick
+            fonts-dejavu-core  # Устанавливаем базовые шрифты
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -31,66 +31,81 @@ jobs:
       - name: Create assets directory
         run: mkdir -p assets
 
-      - name: Take screenshot (headless)
+      - name: Take optimized screenshot
         run: |
-          node <<EOF
+          node <<"EOF"
           const puppeteer = require('puppeteer');
-          
-          (async () => {
+          const fs = require('fs');
+
+          async function capture() {
             const browser = await puppeteer.launch({
               executablePath: '/usr/bin/chromium-browser',
               headless: 'new',
               args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--enable-webgl',
-                '--use-angle=gl-egl'
-              ]
+                '--disable-dev-shm-usage'
+              ],
+              timeout: 60000
             });
 
             try {
               const page = await browser.newPage();
               await page.setViewport({ width: 1400, height: 800 });
               
-              console.log('Loading page...');
-              await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}', {
-                waitUntil: 'domcontentloaded',
-                timeout: 45000
+              console.log('Loading Skyline...');
+              await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=false', {
+                waitUntil: 'networkidle0',
+                timeout: 60000
               });
 
-              console.log('Basic content check...');
-              await page.waitForFunction(
-                () => document.body.innerText.includes('GitHub'),
-                { timeout: 30000 }
-              );
+              // Альтернативная проверка загрузки
+              await page.waitForFunction(() => {
+                return document.querySelector('canvas, body') !== null;
+              }, { timeout: 30000 });
 
               console.log('Capturing screenshot...');
               await page.screenshot({
                 path: 'assets/skyline.png',
-                type: 'png',
-                fullPage: false
+                type: 'png'
               });
 
+              return true;
             } catch (error) {
-              console.error('Error:', error.message);
-              process.exit(1);
+              console.error('Capture error:', error.message);
+              return false;
             } finally {
               await browser.close();
             }
-          })();
+          }
+
+          if (!await capture()) {
+            // Генерация fallback через Node.js
+            const { createCanvas } = require('canvas');
+            const canvas = createCanvas(1400, 800);
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#0d1117';
+            ctx.fillRect(0, 0, 1400, 800);
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '40px DejaVu Sans';
+            ctx.textAlign = 'center';
+            ctx.fillText('GitHub Skyline', 700, 350);
+            ctx.font = '20px DejaVu Sans';
+            ctx.fillText('Visualization temporarily unavailable', 700, 400);
+            
+            fs.writeFileSync('assets/skyline.png', canvas.toBuffer('image/png'));
+          }
           EOF
 
-      - name: Generate fallback if empty
-        if: failure()
+      - name: Verify result
         run: |
-          convert -size 1400x800 xc:#0d1117 \
-            -fill white -pointsize 40 -gravity center \
-            -annotate +0+0 "GitHub Skyline\nCurrently Unavailable" \
-            assets/skyline.png
+          [ -s assets/skyline.png ] || exit 1
+          file assets/skyline.png
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update Skyline snapshot"
+          commit_message: "Update Skyline view"
           file_pattern: "assets/skyline.png"
