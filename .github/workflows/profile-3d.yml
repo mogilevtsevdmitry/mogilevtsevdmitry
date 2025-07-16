@@ -13,12 +13,12 @@ jobs:
       - name: Take screenshot
         uses: peter-evans/screenshot-website@v1
         with:
-          url: "https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}/embed?enableZoom=false&autoRotate=true"
+          url: "https://skyline.github.com/mogilevtsevdmitry/2024"  # Официальный URL
           output: "skyline.png"
-          delay: 20000  # 20 секунд для рендеринга
-          viewportWidth: 800
-          viewportHeight: 600
-          args: "--no-sandbox --disable-setuid-sandbox"
+          delay: 30000  # 30 секунд для рендеринга WebGL
+          viewportWidth: 1200
+          viewportHeight: 800
+          args: "--no-sandbox --disable-setuid-sandbox --user-agent='Mozilla/5.0'"
 
       - name: Save screenshot
         run: |
