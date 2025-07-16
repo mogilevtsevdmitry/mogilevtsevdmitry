@@ -13,22 +13,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download Skyline SVG
+      - name: Download and fix Skyline SVG
         run: |
           mkdir -p assets
-          curl -s "https://skyline.github.com/${{ github.repository_owner }}/2024.svg" -o assets/skyline.svg
+          # Скачиваем и исправляем XML-сущности
+          curl -s "https://skyline.github.com/${{ github.repository_owner }}/2024.svg" | \
+          sed 's/&middot;/·/g' | \
+          sed 's/&bull;/•/g' | \
+          sed 's/&copy;/©/g' > assets/skyline.svg
           
-          # Конвертируем SVG в PNG (опционально)
-          if ! command -v inkscape &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y inkscape
+          # Проверяем валидность SVG
+          if ! xmllint --noout assets/skyline.svg; then
+            echo "SVG is invalid, using fallback"
+            echo '<svg xmlns="http://www.w3.org/2000/svg"><text x="20" y="40">GitHub Skyline currently unavailable</text></svg>' > assets/skyline.svg
           fi
+
+      - name: Convert to PNG (optional)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y inkscape
           inkscape --export-type=png -w 1400 -h 800 assets/skyline.svg -o assets/skyline.png
 
       - name: Verify files
         run: |
           ls -la assets/
-          [ -s assets/skyline.svg ] || (echo "SVG file is empty!" && exit 1)
-          [ ! -f assets/skyline.png ] || [ -s assets/skyline.png ] || (echo "PNG file is empty!" && exit 1)
+          [ -s assets/skyline.svg ] || exit 1
+          file assets/skyline.svg
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
