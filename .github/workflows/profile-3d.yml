@@ -13,54 +13,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create assets directory
-        run: mkdir -p assets
-
-      - name: Setup Chrome and Puppeteer
+      - name: Prepare environment
         run: |
+          mkdir -p assets
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          npm install puppeteer
+          sudo apt-get install -y chromium-browser
 
-      - name: Take screenshot with absolute path control
+      - name: Take screenshot using Python
         run: |
-          FULL_PATH="$GITHUB_WORKSPACE/assets/skyline.png"
-          node -e "
-          const puppeteer = require('puppeteer');
-          (async () => {
-            const browser = await puppeteer.launch({
-              executablePath: '/usr/bin/google-chrome-stable',
-              headless: 'new',
-              args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-            });
-            const page = await browser.newPage();
-            await page.setViewport({ width: 1200, height: 800 });
-            await page.goto('https://skyline.github.com/${{ github.repository_owner }}/2024', {
-              waitUntil: 'networkidle2',
-              timeout: 90000
-            });
-            
-            // Дополнительные проверки
-            await page.waitForFunction('document.querySelector("canvas") !== null', { timeout: 60000 });
-            await new Promise(resolve => setTimeout(resolve, 15000));
-            
-            // Гарантированное сохранение
-            await page.screenshot({ path: '$FULL_PATH', fullPage: false });
-            await browser.close();
-            
-            // Проверка существования файла
-            const fs = require('fs');
-            if (!fs.existsSync('$FULL_PATH')) {
-              throw new Error('Screenshot failed to save!');
-            }
-          })();
+          python3 -c "
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          import time
+
+          options = Options()
+          options.add_argument('--no-sandbox')
+          options.add_argument('--disable-dev-shm-usage')
+          options.add_argument('--headless')
+          options.binary_location = '/usr/bin/chromium-browser'
+
+          driver = webdriver.Chrome(options=options)
+          driver.set_window_size(1200, 800)
+          driver.get('https://skyline.github.com/${{ github.repository_owner }}/2024')
+          
+          # Ждем полной загрузки
+          time.sleep(30)
+          
+          # Сохраняем прямо в нужную папку
+          driver.save_screenshot('assets/skyline.png')
+          driver.quit()
           "
 
-      - name: Verify file existence
+      - name: Verify screenshot
         run: |
-          ls -la assets/
-          [ -f assets/skyline.png ] || exit 1
           file assets/skyline.png
+          [ -s assets/skyline.png ] || exit 1
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
