@@ -3,39 +3,33 @@ name: Update Skyline Screenshot
 on:
   schedule:
     - cron: '0 0 * * *'  # Каждый день в 00:00 UTC
-  workflow_dispatch:      # Ручной запуск
+  workflow_dispatch:
 
 jobs:
   screenshot:
     runs-on: ubuntu-latest
 
     steps:
-      # Шаг 1: Делаем скриншот Skyline
       - name: Take screenshot
-        uses: micnncim/action-screenshot@v2
+        uses: peter-evans/screenshot-website@v1
         with:
-          url: "https://skyline.github.com/${{ github.repository_owner }}/2024"
-          viewport: "800x600"
-          fullPage: false
-          delay: 5000       # Даём время на загрузку WebGL (важно!)
+          url: "https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}/embed?enableZoom=false&autoRotate=true"
           output: "skyline.png"
+          delay: 20000  # 20 секунд для рендеринга
+          viewportWidth: 800
+          viewportHeight: 600
+          args: "--no-sandbox --disable-setuid-sandbox"
 
-      # Шаг 2: Создаём папку assets (если её нет)
-      - name: Create assets directory
-        run: mkdir -p assets
-
-      # Шаг 3: Сохраняем скриншот
       - name: Save screenshot
-        run: mv skyline.png assets/skyline.png
+        run: |
+          mkdir -p assets
+          mv skyline.png assets/skyline.png
 
-      # Шаг 4: Обновляем README.md (если нужно)
       - name: Update README
         run: |
           sed -i 's|!\[GitHub Skyline\](.*)|![GitHub Skyline](assets/skyline.png)|' README.md
 
-      # Шаг 5: Пушим изменения
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update GitHub Skyline screenshot"
-          branch: main
+          commit_message: "Update Skyline screenshot"
