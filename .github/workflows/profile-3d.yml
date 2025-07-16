@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4  # Важно: проверяем репозиторий
+      - uses: actions/checkout@v4  # Критически важно для доступа к репозиторию
 
       - name: Create assets directory
         run: mkdir -p assets  # Создаем папку заранее
@@ -18,11 +18,15 @@ jobs:
       - name: Take screenshot
         uses: swinton/screenshot-website@v1.x
         with:
-          source: "https://skyline.github.com/mogilevtsevdmitry/2024"  # Официальный URL
-          destination: "assets/skyline.png"  # Относительный путь
-          width: 800
+          source: "https://skyline.github.com/mogilevtsevdmitry/2024"
+          destination: "screenshot.png"  # Сохраняем в корень временной папки
+          width: 1200
+          height: 800
           delay: 30000  # 30 секунд для рендеринга WebGL
           args: "--no-sandbox --disable-setuid-sandbox"
+
+      - name: Move screenshot to assets
+        run: mv screenshot.png assets/skyline.png  # Переносим в нужную папку
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
