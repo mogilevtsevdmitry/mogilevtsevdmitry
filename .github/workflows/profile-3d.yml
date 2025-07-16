@@ -7,19 +7,28 @@ on:
 jobs:
   screenshot:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
+      # Создаём папку assets, если её нет
+      - name: Create assets directory
+        run: mkdir -p assets
+
       - name: Take screenshot
         uses: swinton/screenshot-website@v1.x
         with:
-          source: https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}/embed?enableZoom=false&autoRotate=false
+          source: https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}/embed?enableZoom=false&autoRotate=true
           destination: assets/skyline.png
-          width: 800
-          height: 600
-      - name: Commit screenshot
+          width: 800               # пример, подберите ширину по вкусу
+          full-page: false         # если нужен весь скролл, установите true
+          delay: 2                 # задержка в секундах для загрузки модели
+
+      - name: Commit & Push
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add assets/skyline.png
-          git commit -m "Update skyline screenshot" || exit 0
-          git push
+          if git commit -m "Update skyline screenshot"; then
+            git push
+          fi
