@@ -58,7 +58,7 @@ jobs:
               await page.setDefaultNavigationTimeout(180000);
               
               console.log('Trying official Skyline...');
-              const success = await tryCapture(page, 'https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=false&autoRotate=false');
+              const success = await tryCapture(page, 'https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}/embed?enableZoom=false&autoRotate=false');
               
               return success;
             } finally {
