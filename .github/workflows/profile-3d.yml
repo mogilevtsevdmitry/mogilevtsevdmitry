@@ -12,17 +12,22 @@ jobs:
       - uses: actions/checkout@v4
 
       # Создаём папку assets, если её нет
-      - name: Create assets directory
-        run: mkdir -p assets
-
       - name: Take screenshot
+        id: shot
         uses: swinton/screenshot-website@v1.x
         with:
           source: https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}/embed?enableZoom=false&autoRotate=true
-          destination: ${{ github.workspace }}/assets/skyline.png
+          # не указываем destination — оставляем дефолтное название screenshot.png
           width: 800
           full-page: false
           delay: 2
+
+      - name: Create assets directory
+        run: mkdir -p assets
+
+      - name: Move screenshot to assets
+        run: |
+          mv "${{ steps.shot.outputs.path }}" assets/skyline.png
 
       - name: Commit & Push
         run: |
@@ -32,3 +37,4 @@ jobs:
           if git commit -m "Update skyline screenshot"; then
             git push
           fi
+
