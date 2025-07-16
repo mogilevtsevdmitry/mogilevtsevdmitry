@@ -92,7 +92,7 @@ jobs:
           });
           EOF
 
-      - name: Crop image (30% from all sides)
+      - name: Crop image
         run: |
           # Устанавливаем ImageMagick policy для обработки PNG
           sudo sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/' /etc/ImageMagick-6/policy.xml
@@ -102,8 +102,8 @@ jobs:
           width=$(identify -format '%w' assets/skyline-full.png)
           height=$(identify -format '%h' assets/skyline-full.png)
           
-          new_width=$(printf "%.0f" $(echo "$width * 0.4" | bc))
-          new_height=$(printf "%.0f" $(echo "$height * 0.4" | bc))
+          new_width=$(printf "%.0f" $(echo "$width * 0.2" | bc))
+          new_height=$(printf "%.0f" $(echo "$height * 0.2" | bc))
           
           crop_x=$(( ($width - $new_width) / 2 ))
           crop_y=$(( ($height - $new_height) / 2 ))
