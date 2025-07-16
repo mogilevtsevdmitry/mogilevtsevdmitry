@@ -1,40 +1,41 @@
 name: Update Skyline Screenshot
+
 on:
   schedule:
-    - cron: '0 0 * * *' # Еженедельно
-  workflow_dispatch:
+    - cron: '0 0 * * *'  # Каждый день в 00:00 UTC
+  workflow_dispatch:      # Ручной запуск
 
 jobs:
   screenshot:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-
-      # Создаём папку assets, если её нет
+      # Шаг 1: Делаем скриншот Skyline
       - name: Take screenshot
-        id: shot
-        uses: swinton/screenshot-website@v1.x
+        uses: micnncim/action-screenshot@v2
         with:
-          source: https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}/embed?enableZoom=false&autoRotate=true
-          # не указываем destination — оставляем дефолтное название screenshot.png
-          width: 800
-          full-page: false
-          delay: 2
+          url: "https://skyline.github.com/${{ github.repository_owner }}/2024"
+          viewport: "800x600"
+          fullPage: false
+          delay: 5000       # Даём время на загрузку WebGL (важно!)
+          output: "skyline.png"
 
+      # Шаг 2: Создаём папку assets (если её нет)
       - name: Create assets directory
         run: mkdir -p assets
 
-      - name: Move screenshot to assets
-        run: |
-          mv "${{ steps.shot.outputs.path }}" assets/skyline.png
+      # Шаг 3: Сохраняем скриншот
+      - name: Save screenshot
+        run: mv skyline.png assets/skyline.png
 
+      # Шаг 4: Обновляем README.md (если нужно)
+      - name: Update README
+        run: |
+          sed -i 's|!\[GitHub Skyline\](.*)|![GitHub Skyline](assets/skyline.png)|' README.md
+
+      # Шаг 5: Пушим изменения
       - name: Commit & Push
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add assets/skyline.png
-          if git commit -m "Update skyline screenshot"; then
-            git push
-          fi
-
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update GitHub Skyline screenshot"
+          branch: main
