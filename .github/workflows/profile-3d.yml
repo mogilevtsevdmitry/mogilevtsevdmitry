@@ -1,4 +1,4 @@
-name: Update Skyline Screenshot
+name: Update Skyline Visualization
 
 on:
   schedule:
@@ -6,70 +6,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  screenshot:
+  update:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-chromedriver
-          python -m pip install selenium pillow
-
-      - name: Take screenshot
+      - name: Download Skyline SVG
         run: |
           mkdir -p assets
-          python -c "
-          from selenium import webdriver
-          from selenium.webdriver.chrome.options import Options
-          from selenium.webdriver.common.by import By
-          from selenium.webdriver.support.ui import WebDriverWait
-          from selenium.webdriver.support import expected_conditions as EC
-          import time
+          curl -s "https://skyline.github.com/${{ github.repository_owner }}/2024.svg" -o assets/skyline.svg
+          
+          # Конвертируем SVG в PNG (опционально)
+          if ! command -v inkscape &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y inkscape
+          fi
+          inkscape --export-type=png -w 1400 -h 800 assets/skyline.svg -o assets/skyline.png
 
-          options = Options()
-          options.add_argument('--headless')
-          options.add_argument('--no-sandbox')
-          options.add_argument('--disable-dev-shm-usage')
-          options.add_argument('--window-size=1400,1000')
-          options.binary_location = '/usr/bin/chromium-browser'
-
-          driver = webdriver.Chrome(options=options)
-          try:
-              print('Opening Skyline page...')
-              driver.get('https://skyline.github.com/${{ github.repository_owner }}/2024')
-              
-              print('Waiting for canvas (up to 3 minutes)...')
-              WebDriverWait(driver, 180).until(
-                  EC.presence_of_element_located((By.TAG_NAME, 'canvas'))
-              )
-              
-              print('Additional wait for rendering...')
-              time.sleep(60)
-              
-              print('Taking screenshot...')
-              driver.save_screenshot('assets/skyline.png')
-              print('Screenshot saved successfully')
-          finally:
-              driver.quit()
-          "
-
-      - name: Verify screenshot
+      - name: Verify files
         run: |
           ls -la assets/
-          [ -s assets/skyline.png ] || (echo "Screenshot is empty!" && exit 1)
-          file assets/skyline.png
+          [ -s assets/skyline.svg ] || (echo "SVG file is empty!" && exit 1)
+          [ ! -f assets/skyline.png ] || [ -s assets/skyline.png ] || (echo "PNG file is empty!" && exit 1)
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update Skyline screenshot"
-          file_pattern: "assets/skyline.png"
+          commit_message: "Update Skyline visualization"
+          file_pattern: assets/*
