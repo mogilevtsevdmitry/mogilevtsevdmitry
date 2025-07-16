@@ -61,3 +61,8 @@
     </td>
   </tr>
 </table>
+
+## GitHub SkyLine
+# Мой GitHub Skyline 🏙️  
+
+[![GitHub Skyline](https://skyline.github.com/YOUR_USERNAME/2024.svg)](https://skyline.github.com/YOUR_USERNAME/2024)  
