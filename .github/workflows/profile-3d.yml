@@ -8,55 +8,80 @@ on:
 jobs:
   screenshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create assets directory
-        run: mkdir -p assets
-
-      - name: Setup Chrome and Puppeteer
+      - name: Setup environment
         run: |
+          mkdir -p assets
           sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
-          npm install puppeteer
+          sudo apt-get install -y wget unzip
 
-      - name: Take screenshot with absolute path control
+      - name: Install Chromium
         run: |
-          FULL_PATH="$GITHUB_WORKSPACE/assets/skyline.png"
+          wget https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F1234567%2Fchrome-linux.zip?alt=media -O chrome.zip
+          unzip chrome.zip
+          sudo mv chrome-linux /usr/local/bin/
+
+      - name: Take screenshot
+        run: |
+          # Установка Node.js и зависимостей
+          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          npm install puppeteer-core
+
+          # Скрипт для скриншота с увеличенными таймаутами
           node -e "
-          const puppeteer = require('puppeteer');
+          const puppeteer = require('puppeteer-core');
           (async () => {
             const browser = await puppeteer.launch({
-              executablePath: '/usr/bin/google-chrome-stable',
-              headless: 'new',
-              args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+              executablePath: '/usr/local/bin/chrome-linux/chrome',
+              headless: true,
+              args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--window-size=1200,800'
+              ],
+              timeout: 180000
             });
-            const page = await browser.newPage();
-            await page.setViewport({ width: 1200, height: 800 });
-            await page.goto('https://skyline.github.com/${{ github.repository_owner }}/2024', {
-              waitUntil: 'networkidle2',
-              timeout: 90000
-            });
-            
-            // Дополнительные проверки
-            await page.waitForFunction('document.querySelector("canvas") !== null', { timeout: 60000 });
-            await new Promise(resolve => setTimeout(resolve, 15000));
-            
-            // Гарантированное сохранение
-            await page.screenshot({ path: '$FULL_PATH', fullPage: false });
-            await browser.close();
-            
-            // Проверка существования файла
-            const fs = require('fs');
-            if (!fs.existsSync('$FULL_PATH')) {
-              throw new Error('Screenshot failed to save!');
+
+            try {
+              const page = await browser.newPage();
+              await page.setDefaultNavigationTimeout(180000);
+              await page.setDefaultTimeout(180000);
+              
+              console.log('Navigating to Skyline...');
+              await page.goto('https://skyline.github.com/${{ github.repository_owner }}/2024', {
+                waitUntil: 'networkidle2',
+                timeout: 180000
+              });
+
+              console.log('Waiting for canvas...');
+              await page.waitForSelector('canvas', { timeout: 120000 });
+              
+              console.log('Waiting additional 30s for WebGL...');
+              await new Promise(resolve => setTimeout(resolve, 30000));
+
+              console.log('Taking screenshot...');
+              await page.screenshot({
+                path: 'assets/skyline.png',
+                fullPage: false,
+                type: 'png',
+                quality: 100
+              });
+
+              console.log('Screenshot saved');
+            } finally {
+              await browser.close();
             }
           })();
           "
 
-      - name: Verify file existence
+      - name: Verify screenshot
         run: |
           ls -la assets/
           [ -f assets/skyline.png ] || exit 1
