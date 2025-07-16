@@ -1,4 +1,4 @@
-name: Reliable Skyline Capture
+name: Skyline Screenshot Simplified
 
 on:
   schedule:
@@ -8,87 +8,86 @@ on:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup environment (safe mode)
+      - name: Setup minimal environment
         run: |
-          # Ожидаем освобождения блокировки
-          while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
-            echo "Waiting for package manager to unlock..."
-            sleep 5
-          done
+          sudo apt-get update || true
+          sudo apt-get install -y --no-install-recommends \
+            chromium-browser \
+            imagemagick
 
-          # Устанавливаем только необходимые пакеты
-          sudo apt-get update -o Acquire::Retries=3 || true
-          sudo apt-get install -y \
-            --no-install-recommends \
-            libgbm1 \
-            libxshmfence1 \
-            libglu1-mesa \
-            xvfb \
-            imagemagick \
-            chromium \
-            fonts-freefont-ttf
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-          # Чистка кеша
-          sudo apt-get clean
-          sudo rm -rf /var/lib/apt/lists/*
-
-      - name: Install Node.js dependencies
-        run: |
-          npm install puppeteer@19.11.1 --no-fund --no-audit
+      - name: Install Puppeteer
+        run: npm install puppeteer@19.11.1 --no-fund --no-audit
 
       - name: Create assets directory
         run: mkdir -p assets
 
-      - name: Capture Skyline (simplified)
+      - name: Take screenshot (headless)
         run: |
-          export DISPLAY=:99
-          Xvfb :99 -screen 0 1920x1080x24 +extension GLX -nolisten tcp &
-          
           node <<EOF
           const puppeteer = require('puppeteer');
           
           (async () => {
             const browser = await puppeteer.launch({
-              executablePath: '/usr/bin/chromium',
+              executablePath: '/usr/bin/chromium-browser',
               headless: 'new',
               args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--window-size=1920,1080'
+                '--enable-webgl',
+                '--use-angle=gl-egl'
               ]
             });
 
             try {
               const page = await browser.newPage();
-              await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=false', {
+              await page.setViewport({ width: 1400, height: 800 });
+              
+              console.log('Loading page...');
+              await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}', {
                 waitUntil: 'domcontentloaded',
-                timeout: 60000
+                timeout: 45000
               });
 
-              // Простая проверка загрузки
-              await page.waitForFunction(() => {
-                return document.querySelector('body')?.textContent?.includes('GitHub Skyline');
-              }, { timeout: 30000 });
+              console.log('Basic content check...');
+              await page.waitForFunction(
+                () => document.body.innerText.includes('GitHub'),
+                { timeout: 30000 }
+              );
 
-              await new Promise(resolve => setTimeout(resolve, 5000));
-              await page.screenshot({ path: 'assets/skyline.png' });
-              
+              console.log('Capturing screenshot...');
+              await page.screenshot({
+                path: 'assets/skyline.png',
+                type: 'png',
+                fullPage: false
+              });
+
+            } catch (error) {
+              console.error('Error:', error.message);
+              process.exit(1);
             } finally {
               await browser.close();
             }
           })();
           EOF
 
-      - name: Verify result
+      - name: Generate fallback if empty
+        if: failure()
         run: |
-          [ -f assets/skyline.png ] || exit 1
-          file assets/skyline.png
+          convert -size 1400x800 xc:#0d1117 \
+            -fill white -pointsize 40 -gravity center \
+            -annotate +0+0 "GitHub Skyline\nCurrently Unavailable" \
+            assets/skyline.png
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
