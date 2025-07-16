@@ -8,37 +8,59 @@ on:
 jobs:
   screenshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10  # Увеличиваем таймаут
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+      - name: Create assets directory
+        run: mkdir -p assets
 
-      - name: Install dependencies
+      - name: Setup Chrome and Puppeteer
         run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
           npm install puppeteer
-          sudo apt-get install -y libgbm-dev  # Для поддержки Chrome в Linux
 
-      - name: Take screenshot
-        uses: docker://ghcr.io/puppeteer/puppeteer:latest
-        with:
-          entrypoint: node
-          args: |
-            -e "
-            const puppeteer = require('puppeteer');
-            (async () => {
-              const browser = await puppeteer.launch();
-              const page = await browser.newPage();
-              await page.goto('https://skyline.github.com/${{ github.repository_owner }}/2024', {waitUntil: 'networkidle2'});
-              await new Promise(resolve => setTimeout(resolve, 30000));
-              await page.screenshot({path: '/github/workspace/assets/skyline.png'});
-              await browser.close();
-            })();
-            "
+      - name: Take screenshot with absolute path control
+        run: |
+          FULL_PATH="$GITHUB_WORKSPACE/assets/skyline.png"
+          node -e "
+          const puppeteer = require('puppeteer');
+          (async () => {
+            const browser = await puppeteer.launch({
+              executablePath: '/usr/bin/google-chrome-stable',
+              headless: 'new',
+              args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            });
+            const page = await browser.newPage();
+            await page.setViewport({ width: 1200, height: 800 });
+            await page.goto('https://skyline.github.com/${{ github.repository_owner }}/2024', {
+              waitUntil: 'networkidle2',
+              timeout: 90000
+            });
+            
+            // Дополнительные проверки
+            await page.waitForFunction('document.querySelector("canvas") !== null', { timeout: 60000 });
+            await new Promise(resolve => setTimeout(resolve, 15000));
+            
+            // Гарантированное сохранение
+            await page.screenshot({ path: '$FULL_PATH', fullPage: false });
+            await browser.close();
+            
+            // Проверка существования файла
+            const fs = require('fs');
+            if (!fs.existsSync('$FULL_PATH')) {
+              throw new Error('Screenshot failed to save!');
+            }
+          })();
+          "
+
+      - name: Verify file existence
+        run: |
+          ls -la assets/
+          [ -f assets/skyline.png ] || exit 1
+          file assets/skyline.png
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
