@@ -1,4 +1,4 @@
-name: Skyline Screenshot with Waiting
+name: Ultimate Skyline Capture
 
 on:
   schedule:
@@ -16,7 +16,10 @@ jobs:
       - name: Setup environment
         run: |
           sudo apt-get update || true
-          sudo apt-get install -y chromium-browser
+          sudo apt-get install -y \
+            chromium-browser \
+            imagemagick \
+            fonts-dejavu-core
 
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -29,13 +32,13 @@ jobs:
       - name: Create assets directory
         run: mkdir -p assets
 
-      - name: Take screenshot with proper waiting
+      - name: Take screenshot with smart waiting
         run: |
           node <<"EOF"
           const puppeteer = require('puppeteer');
           const fs = require('fs');
 
-          async function capture() {
+          async function captureSkyline() {
             const browser = await puppeteer.launch({
               executablePath: '/usr/bin/chromium-browser',
               headless: 'new',
@@ -44,74 +47,60 @@ jobs:
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--enable-webgl'
-              ]
+              ],
+              timeout: 180000
             });
 
             try {
               const page = await browser.newPage();
+              await page.setDefaultNavigationTimeout(180000);
               await page.setViewport({ width: 1400, height: 800 });
               
-              console.log('Navigating to Skyline...');
+              console.log('Loading Skyline (alternative method)...');
+              await page.goto('about:blank');
               await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=false', {
-                waitUntil: 'networkidle0',
+                waitUntil: 'domcontentloaded',
                 timeout: 120000
               });
 
-              console.log('Waiting for 3D visualization to load...');
-              
-              // Ждем появления canvas и его заполнения
-              await page.waitForSelector('canvas', { visible: true, timeout: 60000 });
-              
-              // Дополнительное ожидание для полного рендеринга
-              await new Promise(resolve => setTimeout(resolve, 30000));
-              
-              // Проверяем, что canvas имеет содержание
+              console.log('Basic content verification...');
               await page.waitForFunction(() => {
-                const canvas = document.querySelector('canvas');
-                if (!canvas) return false;
-                
-                // Проверка что canvas не пустой
-                const ctx = canvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, 10, 10).data;
-                return imageData.some(channel => channel !== 0);
-              }, { timeout: 30000 });
+                return document.querySelector('body')?.textContent?.includes('GitHub');
+              }, { timeout: 60000 });
 
-              console.log('Capturing final screenshot...');
+              console.log('Waiting extra time for rendering...');
+              await new Promise(resolve => setTimeout(resolve, 45000));
+
+              console.log('Capturing screenshot...');
               await page.screenshot({
                 path: 'assets/skyline.png',
                 type: 'png',
-                fullPage: false,
-                quality: 90
+                fullPage: false
               });
 
               return true;
             } catch (error) {
-              console.error('Error during capture:', error);
+              console.error('Capture error:', error.message);
               return false;
             } finally {
               await browser.close();
             }
           }
 
+          // Main execution
           (async () => {
-            if (!await capture()) {
-              // Fallback на случай ошибки
-              const { createCanvas } = require('canvas');
-              const canvas = createCanvas(1400, 800);
-              const ctx = canvas.getContext('2d');
-              
-              ctx.fillStyle = '#0d1117';
-              ctx.fillRect(0, 0, 1400, 800);
-              
-              ctx.fillStyle = '#ffffff';
-              ctx.font = 'bold 40px sans-serif';
-              ctx.textAlign = 'center';
-              ctx.fillText('GitHub Skyline', 700, 350);
-              ctx.font = '20px sans-serif';
-              ctx.fillText('Updated: ' + new Date().toLocaleDateString(), 700, 400);
-              
-              fs.writeFileSync('assets/skyline.png', canvas.toBuffer('image/png'));
+            if (!await captureSkyline()) {
+              console.log('Generating fallback image...');
+              // Simple fallback without canvas
+              const { execSync } = require('child_process');
+              execSync(`
+                convert -size 1400x800 xc:#0d1117 \\
+                  -fill white -font DejaVu-Sans -pointsize 40 -gravity center \\
+                  -annotate +0+0 "GitHub Skyline\\nCurrently Unavailable\\nUpdated: $(date +'%Y-%m-%d')" \\
+                  assets/skyline.png
+              `);
             }
+            console.log('Process completed');
           })();
           EOF
 
@@ -123,5 +112,5 @@ jobs:
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update Skyline visualization"
+          commit_message: "Update Skyline view"
           file_pattern: "assets/skyline.png"
