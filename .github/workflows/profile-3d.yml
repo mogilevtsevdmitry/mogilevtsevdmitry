@@ -102,8 +102,8 @@ jobs:
           width=$(identify -format '%w' assets/skyline-full.png)
           height=$(identify -format '%h' assets/skyline-full.png)
           
-          new_width=$(printf "%.0f" $(echo "$width * 0.7" | bc))
-          new_height=$(printf "%.0f" $(echo "$height * 0.7" | bc))
+          new_width=$(printf "%.0f" $(echo "$width * 0.6" | bc))
+          new_height=$(printf "%.0f" $(echo "$height * 0.6" | bc))
           
           crop_x=$(( ($width - $new_width) / 2 ))
           crop_y=$(( ($height - $new_height) / 2 ))
