@@ -61,10 +61,3 @@
     </td>
   </tr>
 </table>
-
-<iframe
-		src="https://skyline3d.in/mogilevtsevdmitry/embed?endDate=2025-07-16&enableZoom=false"
-		width="100%"
-		height="100%"
-		frameborder="0"
-	></iframe>
