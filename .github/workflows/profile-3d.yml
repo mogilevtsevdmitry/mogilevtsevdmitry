@@ -10,26 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4  # Важно: проверяем репозиторий
+
+      - name: Create assets directory
+        run: mkdir -p assets  # Создаем папку заранее
+
       - name: Take screenshot
-        uses: peter-evans/screenshot-website@v1
+        uses: swinton/screenshot-website@v1.x
         with:
-          url: "https://skyline.github.com/mogilevtsevdmitry/2024"  # Официальный URL
-          output: "skyline.png"
+          source: "https://skyline.github.com/mogilevtsevdmitry/2024"  # Официальный URL
+          destination: "assets/skyline.png"  # Относительный путь
+          width: 800
           delay: 30000  # 30 секунд для рендеринга WebGL
-          viewportWidth: 1200
-          viewportHeight: 800
-          args: "--no-sandbox --disable-setuid-sandbox --user-agent='Mozilla/5.0'"
-
-      - name: Save screenshot
-        run: |
-          mkdir -p assets
-          mv skyline.png assets/skyline.png
-
-      - name: Update README
-        run: |
-          sed -i 's|!\[GitHub Skyline\](.*)|![GitHub Skyline](assets/skyline.png)|' README.md
+          args: "--no-sandbox --disable-setuid-sandbox"
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update Skyline screenshot"
+          file_pattern: "assets/skyline.png"
