@@ -1,4 +1,4 @@
-name: Full Skyline Screenshot
+name: Smart Skyline Capture
 
 on:
   schedule:
@@ -22,23 +22,22 @@ jobs:
             libglu1-mesa-dev \
             xvfb \
             imagemagick \
-            google-chrome-stable
+            chromium-browser
           npm install puppeteer@19.11.1
 
       - name: Create assets directory
         run: mkdir -p assets
 
-      - name: Capture full Skyline
+      - name: Try official Skyline (Primary)
+        id: try_skyline
+        continue-on-error: true
         run: |
-          # Запускаем виртуальный дисплей с большим разрешением
-          Xvfb :99 -screen 0 3840x2160x24 -ac +extension GLX +render -noreset 2>/dev/null &
+          Xvfb :99 -screen 0 1920x1080x24 -ac +extension GLX +render -noreset 2>/dev/null &
           export DISPLAY=:99
 
-          node <<"EOF"
+          node <<EOF
           const puppeteer = require('puppeteer');
-          const fs = require('fs');
-
-          async function captureFullSkyline() {
+          (async () => {
             const browser = await puppeteer.launch({
               headless: 'new',
               args: [
@@ -46,73 +45,68 @@ jobs:
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--use-gl=egl',
-                '--enable-webgl',
-                '--enable-accelerated-2d-canvas',
-                '--ignore-gpu-blocklist',
-                '--window-size=3840,2160',
-                '--force-device-scale-factor=2'
+                '--window-size=1920,1080'
               ],
-              timeout: 300000
+              timeout: 180000
             });
 
             try {
               const page = await browser.newPage();
-              await page.setDefaultNavigationTimeout(300000);
-              await page.setViewport({ width: 3840, height: 2160, deviceScaleFactor: 2 });
-
-              console.log('Loading extended Skyline view...');
-              await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=true&autoRotate=false', {
-                waitUntil: 'networkidle0',
-                timeout: 300000
+              await page.setDefaultNavigationTimeout(120000);
+              await page.goto('https://skyline.github.com/${{ github.repository_owner }}/2024', {
+                waitUntil: 'domcontentloaded',
+                timeout: 120000
               });
-
-              console.log('Waiting for full rendering...');
-              await page.waitForFunction(() => {
-                const canvas = document.querySelector('canvas');
-                return canvas && canvas.width > 2000;
-              }, { timeout: 180000, polling: 5000 });
-
-              console.log('Extra rendering time...');
-              await new Promise(resolve => setTimeout(resolve, 60000));
-
-              console.log('Capturing full screenshot...');
-              await page.screenshot({
-                path: 'assets/skyline-full.png',
-                type: 'png',
-                fullPage: true,
-                captureBeyondViewport: true
-              });
-
+              
+              await page.waitForSelector('canvas', { timeout: 60000 });
+              await new Promise(resolve => setTimeout(resolve, 30000));
+              await page.screenshot({ path: 'assets/skyline.png' });
             } finally {
               await browser.close();
             }
-          }
-
-          captureFullSkyline().catch(err => {
-            console.error('Capture failed:', err);
-            process.exit(1);
-          });
+          })();
           EOF
 
-      - name: Crop and optimize
+      - name: Try alternative service (Secondary)
+        if: steps.try_skyline.outcome == 'failure'
+        id: try_alternative
+        continue-on-error: true
         run: |
-          # Обрезаем только снизу (если нужно)
-          convert assets/skyline-full.png \
-            -crop 100%x70%+0+0 \  # Оставляем 70% высоты
-            -resize 50% \
-            assets/skyline.png
-          
-          optipng -o7 assets/skyline.png
-          rm assets/skyline-full.png
+          node <<EOF
+          const puppeteer = require('puppeteer');
+          (async () => {
+            const browser = await puppeteer.launch({
+              headless: 'new',
+              args: ['--no-sandbox'],
+              timeout: 120000
+            });
 
-      - name: Verify result
+            try {
+              const page = await browser.newPage();
+              await page.setViewport({ width: 1400, height: 800 });
+              await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}');
+              await page.waitForSelector('canvas', { timeout: 60000 });
+              await page.screenshot({ path: 'assets/skyline.png' });
+            } finally {
+              await browser.close();
+            }
+          })();
+          EOF
+
+      - name: Generate fallback visualization
+        if: steps.try_alternative.outcome == 'failure'
         run: |
-          ls -la assets/
-          [ -s assets/skyline.png ] || (echo "Screenshot failed!" && exit 1)
-          file assets/skyline.png
+          convert -size 1400x800 xc:#0d1117 \
+            -fill white -pointsize 40 -gravity center \
+            -annotate +0+0 "GitHub Skyline\nCurrently Unavailable\nLast updated: $(date +'%Y-%m-%d')" \
+            assets/skyline.png
+
+      - name: Optimize image
+        run: |
+          [ -f assets/skyline.png ] && convert assets/skyline.png -quality 90 -strip assets/skyline.png || true
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update full Skyline view"
+          commit_message: "Update Skyline visualization"
           file_pattern: "assets/skyline.png"
