@@ -13,74 +13,68 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
+      - name: Setup environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgbm-dev libxshmfence-dev libglu1-mesa-dev
-          npm install puppeteer@19.11.1  # Версия с лучшей WebGL поддержкой
+          sudo apt-get install -y libgbm-dev libxshmfence-dev libglu1-mesa-dev xvfb
+          npm install puppeteer@19.11.1
 
       - name: Create assets directory
         run: mkdir -p assets
 
-      - name: Take screenshot with WebGL
+      - name: Run Xvfb and take screenshot
         run: |
-          node -e "
+          Xvfb :99 -screen 0 1400x800x24 &
+          export DISPLAY=:99
+          
+          node <<EOF
           const puppeteer = require('puppeteer');
           (async () => {
             const browser = await puppeteer.launch({
-              headless: 'new',
+              headless: true,
               args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--use-gl=egl',  # Критически важно для WebGL
+                '--use-gl=egl',
                 '--enable-webgl',
                 '--enable-accelerated-2d-canvas',
-                '--enable-gpu-rasterization',
                 '--ignore-gpu-blocklist',
                 '--window-size=1400,800'
-              ],
-              env: {
-                DISPLAY: ':99'  # Необходимо для GPU-рендеринга
-              }
+              ]
             });
-            
+
             try {
               const page = await browser.newPage();
               await page.setViewport({ width: 1400, height: 800 });
               
-              console.log('Loading Skyline...');
+              console.log('Loading Skyline visualization...');
               await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=false&autoRotate=false', {
                 waitUntil: 'networkidle2',
                 timeout: 120000
               });
               
-              console.log('Waiting for WebGL initialization...');
+              console.log('Waiting for 3D rendering...');
               await page.waitForFunction(() => {
                 const canvas = document.querySelector('canvas');
-                return canvas && canvas.getContext('webgl');
+                return canvas && canvas.width > 100;
               }, { timeout: 120000 });
               
-              console.log('Additional rendering time...');
               await new Promise(resolve => setTimeout(resolve, 30000));
               
-              console.log('Capturing screenshot...');
+              console.log('Capturing final screenshot...');
               await page.screenshot({
                 path: 'assets/skyline.png',
                 type: 'png',
                 clip: { x: 0, y: 0, width: 1400, height: 800 }
               });
               
+              console.log('Screenshot saved successfully');
             } finally {
               await browser.close();
             }
           })();
-          "
+          EOF
 
       - name: Verify screenshot
         run: |
@@ -91,5 +85,5 @@ jobs:
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update 3D Skyline screenshot"
+          commit_message: "Update 3D Skyline visualization"
           file_pattern: "assets/skyline.png"
