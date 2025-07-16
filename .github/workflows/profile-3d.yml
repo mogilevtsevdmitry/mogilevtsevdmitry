@@ -2,7 +2,7 @@ name: 3D Skyline Screenshot
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Ежедневно в 00:00 UTC
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
@@ -38,7 +38,8 @@ jobs:
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-gpu'
+                '--disable-gpu',
+                '--window-size=1400,800'
               ]
             });
             
@@ -46,25 +47,24 @@ jobs:
               const page = await browser.newPage();
               await page.setViewport({ width: 1400, height: 800 });
               
-              console.log('Opening Skyline page...');
+              console.log('Navigating to Skyline...');
               await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=false&autoRotate=false', {
                 waitUntil: 'networkidle2',
-                timeout: 60000
+                timeout: 90000
               });
               
-              console.log('Waiting for visualization to load...');
-              await page.waitForSelector('canvas', { timeout: 60000 });
-              await new Promise(resolve => setTimeout(resolve, 15000));  // Дополнительное ожидание
+              console.log('Waiting for canvas...');
+              await page.waitForSelector('canvas', { timeout: 90000 });
+              await new Promise(resolve => setTimeout(resolve, 20000));
               
-              console.log('Capturing screenshot...');
+              console.log('Taking screenshot...');
               await page.screenshot({
                 path: 'assets/skyline.png',
                 type: 'png',
-                quality: 90,
-                clip: { x: 0, y: 0, width: 1400, height: 800 }
+                clip: { x: 0, y: 0, width: 1400, height: 800 },
+                omitBackground: true
               });
               
-              console.log('Done!');
             } finally {
               await browser.close();
             }
