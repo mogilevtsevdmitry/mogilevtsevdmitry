@@ -13,61 +13,53 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          node-version: '20'
+          python-version: '3.10'
 
-      - name: Install Playwright
+      - name: Install dependencies
         run: |
-          npm init playwright@latest --yes
-          npx playwright install-deps
+          sudo apt-get update
+          sudo apt-get install -y chromium-chromedriver
+          python -m pip install selenium pillow
 
       - name: Take screenshot
         run: |
           mkdir -p assets
-          node -e "
-          const { chromium } = require('playwright');
-          (async () => {
-            const browser = await chromium.launch({
-              headless: true,
-              timeout: 300000
-            });
-            
-            try {
-              const page = await browser.newPage();
-              await page.setViewportSize({ width: 1400, height: 1000 });
+          python -c "
+          from selenium import webdriver
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.support.ui import WebDriverWait
+          from selenium.webdriver.support import expected_conditions as EC
+          import time
+
+          options = Options()
+          options.add_argument('--headless')
+          options.add_argument('--no-sandbox')
+          options.add_argument('--disable-dev-shm-usage')
+          options.add_argument('--window-size=1400,1000')
+          options.binary_location = '/usr/bin/chromium-browser'
+
+          driver = webdriver.Chrome(options=options)
+          try:
+              print('Opening Skyline page...')
+              driver.get('https://skyline.github.com/${{ github.repository_owner }}/2024')
               
-              console.log('Navigating to Skyline...');
-              await page.goto('https://skyline.github.com/${{ github.repository_owner }}/2024', {
-                waitUntil: 'networkidle',
-                timeout: 300000
-              });
+              print('Waiting for canvas (up to 3 minutes)...')
+              WebDriverWait(driver, 180).until(
+                  EC.presence_of_element_located((By.TAG_NAME, 'canvas'))
+              )
               
-              console.log('Waiting for visualization (up to 3 minutes)...');
-              await page.waitForSelector('canvas', { state: 'attached', timeout: 180000 });
-              await page.waitForFunction(() => {
-                const canvas = document.querySelector('canvas');
-                return canvas && canvas.width > 100 && canvas.height > 100;
-              }, { timeout: 180000 });
+              print('Additional wait for rendering...')
+              time.sleep(60)
               
-              console.log('Additional waiting for WebGL render...');
-              await new Promise(resolve => setTimeout(resolve, 60000));
-              
-              console.log('Taking screenshot...');
-              await page.screenshot({
-                path: 'assets/skyline.png',
-                type: 'png',
-                fullPage: false,
-                animations: 'disabled',
-                timeout: 60000
-              });
-              
-              console.log('Screenshot saved successfully');
-            } finally {
-              await browser.close();
-            }
-          })();
+              print('Taking screenshot...')
+              driver.save_screenshot('assets/skyline.png')
+              print('Screenshot saved successfully')
+          finally:
+              driver.quit()
           "
 
       - name: Verify screenshot
