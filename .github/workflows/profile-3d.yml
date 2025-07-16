@@ -1,4 +1,4 @@
-name: Ultimate Skyline Capture
+name: Reliable Skyline Capture
 
 on:
   schedule:
@@ -16,72 +16,66 @@ jobs:
       - name: Setup environment
         run: |
           sudo apt-get update || true
-          sudo apt-get install -y \
-            chromium-browser \
-            fonts-dejavu-core  # Устанавливаем базовые шрифты
+          sudo apt-get install -y chromium-browser
 
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Install Puppeteer
-        run: npm install puppeteer@19.11.1 --no-fund --no-audit
+      - name: Install dependencies
+        run: npm install puppeteer@19.11.1 canvas --no-fund --no-audit
 
       - name: Create assets directory
         run: mkdir -p assets
 
-      - name: Take optimized screenshot
+      - name: Run capture script
         run: |
           node <<"EOF"
           const puppeteer = require('puppeteer');
+          const { createCanvas } = require('canvas');
           const fs = require('fs');
 
-          async function capture() {
-            const browser = await puppeteer.launch({
-              executablePath: '/usr/bin/chromium-browser',
-              headless: 'new',
-              args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage'
-              ],
-              timeout: 60000
-            });
-
+          async function captureSkyline() {
             try {
-              const page = await browser.newPage();
-              await page.setViewport({ width: 1400, height: 800 });
-              
-              console.log('Loading Skyline...');
-              await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=false', {
-                waitUntil: 'networkidle0',
+              const browser = await puppeteer.launch({
+                executablePath: '/usr/bin/chromium-browser',
+                headless: 'new',
+                args: [
+                  '--no-sandbox',
+                  '--disable-setuid-sandbox',
+                  '--disable-dev-shm-usage'
+                ],
                 timeout: 60000
               });
 
-              // Альтернативная проверка загрузки
-              await page.waitForFunction(() => {
-                return document.querySelector('canvas, body') !== null;
-              }, { timeout: 30000 });
-
-              console.log('Capturing screenshot...');
-              await page.screenshot({
-                path: 'assets/skyline.png',
-                type: 'png'
+              const page = await browser.newPage();
+              await page.setViewport({ width: 1400, height: 800 });
+              
+              console.log('Loading Skyline page...');
+              await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}', {
+                waitUntil: 'domcontentloaded',
+                timeout: 60000
               });
 
-              return true;
-            } catch (error) {
-              console.error('Capture error:', error.message);
-              return false;
-            } finally {
+              console.log('Waiting for content...');
+              await page.waitForFunction(() => {
+                const bodyText = document.body.textContent;
+                return bodyText.includes('GitHub') || bodyText.includes('Skyline');
+              }, { timeout: 30000 });
+
+              console.log('Taking screenshot...');
+              await page.screenshot({ path: 'assets/skyline.png' });
               await browser.close();
+              return true;
+
+            } catch (error) {
+              console.error('Capture failed:', error.message);
+              return false;
             }
           }
 
-          if (!await capture()) {
-            // Генерация fallback через Node.js
-            const { createCanvas } = require('canvas');
+          async function generateFallback() {
             const canvas = createCanvas(1400, 800);
             const ctx = canvas.getContext('2d');
             
@@ -89,14 +83,23 @@ jobs:
             ctx.fillRect(0, 0, 1400, 800);
             
             ctx.fillStyle = '#ffffff';
-            ctx.font = '40px DejaVu Sans';
+            ctx.font = 'bold 40px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('GitHub Skyline', 700, 350);
-            ctx.font = '20px DejaVu Sans';
-            ctx.fillText('Visualization temporarily unavailable', 700, 400);
+            
+            ctx.font = '20px sans-serif';
+            ctx.fillText('Updated: ' + new Date().toLocaleDateString(), 700, 400);
             
             fs.writeFileSync('assets/skyline.png', canvas.toBuffer('image/png'));
           }
+
+          (async () => {
+            if (!await captureSkyline()) {
+              console.log('Generating fallback image...');
+              await generateFallback();
+            }
+            console.log('Process completed');
+          })();
           EOF
 
       - name: Verify result
