@@ -1,11 +1,14 @@
 name: GitHub-Profile-3D-Contrib
+
 on:
   schedule:
     # Запуск ежедневно в 00:00 UTC
     - cron: '0 0 * * *'
   workflow_dispatch:       # ручной запуск из вкладки Actions
+
 permissions:
   contents: write          # разрешение на push
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,6 +18,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MY_ACCESS_TOKEN }}
           USERNAME: ${{ github.repository_owner }}
+          SETTING_JSON: ./settings.json
       - name: Commit & Push
         run: |
           git config user.name github-actions
