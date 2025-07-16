@@ -8,46 +8,48 @@ on:
 jobs:
   screenshot:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Prepare environment
+      - name: Setup Firefox (geckodriver)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox-esr
+          wget https://github.com/mozilla/geckodriver/releases/download/v0.34.0/geckodriver-v0.34.0-linux64.tar.gz
+          tar -xvzf geckodriver*
+          chmod +x geckodriver
+          sudo mv geckodriver /usr/local/bin/
+
+      - name: Take screenshot with direct path control
         run: |
           mkdir -p assets
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-
-      - name: Take screenshot using Python
-        run: |
           python3 -c "
           from selenium import webdriver
-          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.firefox.options import Options
           import time
 
           options = Options()
-          options.add_argument('--no-sandbox')
-          options.add_argument('--disable-dev-shm-usage')
-          options.add_argument('--headless')
-          options.binary_location = '/usr/bin/chromium-browser'
-
-          driver = webdriver.Chrome(options=options)
-          driver.set_window_size(1200, 800)
-          driver.get('https://skyline.github.com/${{ github.repository_owner }}/2024')
+          options.headless = True
+          driver = webdriver.Firefox(options=options)
           
-          # Ждем полной загрузки
-          time.sleep(30)
-          
-          # Сохраняем прямо в нужную папку
-          driver.save_screenshot('assets/skyline.png')
-          driver.quit()
+          try:
+              driver.set_window_size(1200, 800)
+              driver.get('https://skyline.github.com/${{ github.repository_owner }}/2024')
+              time.sleep(45)  # Максимальное время для WebGL
+              
+              # Явное сохранение по абсолютному пути
+              driver.save_screenshot('$GITHUB_WORKSPACE/assets/skyline.png')
+          finally:
+              driver.quit()
           "
 
-      - name: Verify screenshot
+      - name: Verify file existence
         run: |
+          ls -la assets/
+          [ -f assets/skyline.png ] || (echo "Файл не создан!" && exit 1)
           file assets/skyline.png
-          [ -s assets/skyline.png ] || exit 1
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
