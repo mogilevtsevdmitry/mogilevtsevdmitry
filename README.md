@@ -63,6 +63,5 @@
 </table>
 
 ## GitHub SkyLine
-[![GitHub Skyline](./assets/skyline-screenshot.png)](https://git-skyline.huakun.tech/contribution/github/mogilevtsevdmitry/embed?enableZoom=false&autoRotate=true)
-
+[![GitHub Skyline](./assets/skyline.png)](https://git-skyline.huakun.tech/contribution/github/mogilevtsevdmitry/embed?enableZoom=false&autoRotate=true)
 *Нажмите на изображение для интерактивного просмотра*
