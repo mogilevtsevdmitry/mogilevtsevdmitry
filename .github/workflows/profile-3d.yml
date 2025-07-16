@@ -16,13 +16,13 @@ jobs:
       - name: Setup environment
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgbm-dev libxshmfence-dev libglu1-mesa-dev xvfb
+          sudo apt-get install -y libgbm-dev libxshmfence-dev libglu1-mesa-dev xvfb imagemagick
           npm install puppeteer@19.11.1
 
       - name: Create assets directory
         run: mkdir -p assets
 
-      - name: Run Xvfb and take screenshot
+      - name: Take screenshot with Xvfb
         run: |
           Xvfb :99 -screen 0 1400x800x24 &
           export DISPLAY=:99
@@ -39,51 +39,54 @@ jobs:
                 '--use-gl=egl',
                 '--enable-webgl',
                 '--enable-accelerated-2d-canvas',
-                '--ignore-gpu-blocklist',
-                '--window-size=1400,800'
+                '--ignore-gpu-blocklist'
               ]
             });
 
             try {
               const page = await browser.newPage();
               await page.setViewport({ width: 1400, height: 800 });
-              
-              console.log('Loading Skyline visualization...');
               await page.goto('https://git-skyline.huakun.tech/contribution/github/${{ github.repository_owner }}?enableZoom=false&autoRotate=false', {
                 waitUntil: 'networkidle2',
                 timeout: 120000
               });
-              
-              console.log('Waiting for 3D rendering...');
-              await page.waitForFunction(() => {
-                const canvas = document.querySelector('canvas');
-                return canvas && canvas.width > 100;
-              }, { timeout: 120000 });
-              
+              await page.waitForFunction(() => document.querySelector('canvas'), { timeout: 120000 });
               await new Promise(resolve => setTimeout(resolve, 30000));
-              
-              console.log('Capturing final screenshot...');
-              await page.screenshot({
-                path: 'assets/skyline.png',
-                type: 'png',
-                clip: { x: 0, y: 0, width: 1400, height: 800 }
-              });
-              
-              console.log('Screenshot saved successfully');
+              await page.screenshot({ path: 'assets/skyline-full.png' });
             } finally {
               await browser.close();
             }
           })();
           EOF
 
-      - name: Verify screenshot
+      - name: Crop image (30% from all sides)
+        run: |
+          # Получаем размеры изображения
+          width=$(identify -format '%w' assets/skyline-full.png)
+          height=$(identify -format '%h' assets/skyline-full.png)
+          
+          # Вычисляем новые размеры (уменьшаем на 30% с каждой стороны)
+          new_width=$(echo "$width * 0.4" | bc | cut -d'.' -f1)
+          new_height=$(echo "$height * 0.4" | bc | cut -d'.' -f1)
+          
+          # Вычисляем область для обрезки (центрированно)
+          crop_x=$(echo "($width - $new_width)/2" | bc)
+          crop_y=$(echo "($height - $new_height)/2" | bc)
+          
+          # Обрезаем изображение
+          convert assets/skyline-full.png -crop ${new_width}x${new_height}+${crop_x}+${crop_y} assets/skyline.png
+          
+          # Удаляем временный файл
+          rm assets/skyline-full.png
+
+      - name: Verify result
         run: |
           ls -la assets/
-          [ -s assets/skyline.png ] || (echo "Screenshot failed!" && exit 1)
+          [ -s assets/skyline.png ] || (echo "Final image is empty!" && exit 1)
           file assets/skyline.png
 
       - name: Commit & Push
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Update 3D Skyline visualization"
+          commit_message: "Update cropped Skyline visualization"
           file_pattern: "assets/skyline.png"
