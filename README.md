@@ -43,8 +43,9 @@
 | Группа | Репозитории | Фокус |
 | --- | --- | --- |
 | AI-платформа | [AI Agent Platform](https://github.com/mogilevtsevdmitry/ai-agent-platform-showcase) · [openclaw-virtual-office](https://github.com/mogilevtsevdmitry/openclaw-virtual-office) · [product-development-pipeline](https://github.com/mogilevtsevdmitry/product-development-pipeline) · [agent_orchestrator](https://github.com/mogilevtsevdmitry/agent_orchestrator) | агенты, workflow, runtime и realtime-наблюдаемость |
-| SaaS и продукты | [СметаКП](https://github.com/mogilevtsevdmitry/smeta-kp-showcase) · [Генео](https://github.com/mogilevtsevdmitry/geneo-showcase) · [reply-desk](https://github.com/mogilevtsevdmitry/reply-desk) · [chronos-platform](https://github.com/mogilevtsevdmitry/chronos-platform) · [my-portfolio](https://github.com/mogilevtsevdmitry/my-portfolio) | прикладные сервисы и продуктовая разработка |
+| SaaS и продукты | [СметаКП](https://github.com/mogilevtsevdmitry/smeta-kp-showcase) · [Генео](https://github.com/mogilevtsevdmitry/geneo-showcase) · [Padel App](https://github.com/mogilevtsevdmitry/padel-app-showcase) · [reply-desk](https://github.com/mogilevtsevdmitry/reply-desk) · [chronos-platform](https://github.com/mogilevtsevdmitry/chronos-platform) · [my-portfolio](https://github.com/mogilevtsevdmitry/my-portfolio) | прикладные сервисы и продуктовая разработка |
 | OSS и backend | [nestjs-ddd-cli](https://github.com/mogilevtsevdmitry/nestjs-ddd-cli) · [auth](https://github.com/mogilevtsevdmitry/auth) | NestJS, DDD, API и reusable tooling |
+| R&D и инструменты | [VAG K-line](https://github.com/mogilevtsevdmitry/vag-kline-showcase) · [night-hunt-cat-game](https://github.com/mogilevtsevdmitry/night-hunt-cat-game) | безопасная диагностика, 3D и интерактивные прототипы |
 | Визуальные эксперименты | [night-hunt-cat-game](https://github.com/mogilevtsevdmitry/night-hunt-cat-game) · [neon-heist](https://github.com/mogilevtsevdmitry/neon-heist) | Three.js, Phaser и браузерные прототипы |
 
 Исторические учебные и архивные репозитории переведены в состояние **Archived** и не учитываются в статистике активных проектов.
