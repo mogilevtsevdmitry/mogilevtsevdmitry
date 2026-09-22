@@ -38,6 +38,17 @@
 - **Инженерные инструменты:** `nestjs-ddd-cli`, шаблоны микросервисов, backend-модули и автоматизация delivery.
 - **Продуктовая разработка:** от идеи и доменной модели до платежей, аналитики и деплоя.
 
+## Навигация по репозиториям
+
+| Группа | Репозитории | Фокус |
+| --- | --- | --- |
+| AI-платформа | [openclaw-virtual-office](https://github.com/mogilevtsevdmitry/openclaw-virtual-office) · [product-development-pipeline](https://github.com/mogilevtsevdmitry/product-development-pipeline) · [agent_orchestrator](https://github.com/mogilevtsevdmitry/agent_orchestrator) | агенты, workflow, runtime и realtime-наблюдаемость |
+| SaaS и продукты | [reply-desk](https://github.com/mogilevtsevdmitry/reply-desk) · [chronos-platform](https://github.com/mogilevtsevdmitry/chronos-platform) · [my-portfolio](https://github.com/mogilevtsevdmitry/my-portfolio) | прикладные сервисы и продуктовая разработка |
+| OSS и backend | [nestjs-ddd-cli](https://github.com/mogilevtsevdmitry/nestjs-ddd-cli) · [auth](https://github.com/mogilevtsevdmitry/auth) | NestJS, DDD, API и reusable tooling |
+| Визуальные эксперименты | [night-hunt-cat-game](https://github.com/mogilevtsevdmitry/night-hunt-cat-game) · [neon-heist](https://github.com/mogilevtsevdmitry/neon-heist) | Three.js, Phaser и браузерные прототипы |
+
+Исторические учебные и архивные репозитории переведены в состояние **Archived** и не учитываются в статистике активных проектов.
+
 ## GitHub статистика
 
 Статистика строится внутри репозитория GitHub Actions и сохраняется локально в SVG. Архивные репозитории не учитываются, поэтому блок показывает актуальную активную часть профиля и не зависит от `github-readme-stats.vercel.app`, который периодически недоступен.
