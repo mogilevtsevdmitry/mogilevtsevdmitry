@@ -48,11 +48,4 @@
 
 <p align="center"><img src="./assets/project-stats.svg" alt="Статистика проектов Дмитрия" /></p>
 
-## GitHub Skyline
-
-<p align="center"><a href="https://git-skyline.huakun.tech/contribution/github/mogilevtsevdmitry/embed?enableZoom=false&autoRotate=true"><img src="./assets/skyline.png" alt="GitHub Skyline" /></a></p>
-<p align="center"><sub>Нажмите на изображение для интерактивного просмотра.</sub></p>
-
----
-
 <div align="center"><sub>Открыт к продуктовым задачам, AI-интеграциям и сложному backend. Связь: <a href="https://t.me/mogilevtsevdmitry">@mogilevtsevdmitry</a></sub></div>
