@@ -1,67 +1,58 @@
-<table>
-  <tr>
-    <td width="160px">
-      <img src="2025-10-14 11.23.37.jpg" width="150px" style="border-radius: 10px;">
-    </td>
-    <td>
-      <h2>Могилевцев Дмитрий</h2>
-      🚀 <strong>Backend-разработчик Node.js | NestJS</strong><br/>
-      📍 <strong>Тюмень, Россия</strong><br/>
-      <img src="https://github.com/user-attachments/assets/9054638d-8b56-43c2-b094-f8e29f4a187c" width="15px">&nbsp;&nbsp;<a href="mailto:webmogilevtsev@ya.ru">webmogilevtsev@ya.ru</a><br/>
-      <img src="https://github.com/user-attachments/assets/4c52b3cc-eaad-4380-ad77-9dfba788260a" width="15px">&nbsp;&nbsp;<a href="https://t.me/mogilevtsevdmitry">@mogilevtsevdmitry</a><br/>
-      <img src="https://github.com/user-attachments/assets/86bef0bd-5781-46cc-818f-3e365b5f2fef" width="15px">&nbsp;&nbsp;<a href="https://github.com/mogilevtsevdmitry">GitHub</a>
-    </td>
-  </tr>
-</table>
+<div align="center">
+  <img src="./2025-10-14 11.23.37.jpg" width="140" alt="Дмитрий Могилевцев" />
+  <h1>Дмитрий Могилевцев</h1>
+  <p><strong>Senior Node.js Backend Developer · AI / Agent Engineer · Solo founder</strong></p>
+  <p>Строю надёжные backend-сервисы и продукты с ИИ — от архитектуры и API до CI/CD и продакшена.</p>
+  <p><a href="https://t.me/mogilevtsevdmitry">Telegram</a> · <a href="mailto:webmogilevtsev@ya.ru">Email</a> · <a href="https://github.com/mogilevtsevdmitry">GitHub</a></p>
+  <p>📍 Тюмень, Россия · UTC+5</p>
+</div>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" />
+  <img src="https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=nestjs&logoColor=white" alt="NestJS" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/PostgreSQL-336791?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/AI%20Agents-7C3AED?style=flat-square&logo=openai&logoColor=white" alt="AI Agents" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker" />
+</p>
 
 ---
 
-## 🚀 Технологический стек  
+## Обо мне
 
-### **Backend**  
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
-![TypeORM](https://img.shields.io/badge/TypeORM-262626?style=for-the-badge&logo=typeorm&logoColor=white)
-![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?style=for-the-badge&logo=sequelize&logoColor=white)
-![Python](https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+Я backend-разработчик с фокусом на Node.js/NestJS, архитектуру и автоматизацию. Днём создаю сервисы для сложного финтех- и государственного домена в ДОМ.РФ, а параллельно развиваю свои продукты и виртуальную команду AI-агентов.
 
-### **Databases & Messaging**  
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![Kafka](https://img.shields.io/badge/Kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)
-![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white)
+Мой рабочий фокус — не «вау-демо», а системы, которые можно поддерживать, тестировать и уверенно выводить в прод: понятные контракты, наблюдаемость, миграции без сюрпризов, CI/CD и аккуратная работа с данными.
 
-### **Frontend & Game Development**  
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
-![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![PhaserJS](https://img.shields.io/badge/PhaserJS-0082C9?style=for-the-badge&logo=phaser&logoColor=white)
-![GraphQL](https://img.shields.io/badge/GraphQL-E10098?style=for-the-badge&logo=graphql&logoColor=white)
+## Что умею
 
-### **DevOps & CI/CD**  
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![CI/CD](https://img.shields.io/badge/GitLab%20CI/CD-FC6D26?style=for-the-badge&logo=gitlab&logoColor=white)
+<table>
+  <tr><td width="50%" valign="top"><h3>Backend & architecture</h3><p><code>TypeScript</code> <code>Node.js</code> <code>NestJS</code> <code>Prisma</code> <code>TypeORM</code> <code>Knex</code> <code>REST</code> <code>OpenAPI / Swagger</code> <code>GraphQL</code> <code>SSE</code> <code>WebSocket</code></p><p><code>DDD</code> <code>Clean Architecture</code> <code>SOLID</code> <code>CQRS</code> <code>Event Sourcing</code> <code>интеграции</code> <code>highload</code></p></td><td width="50%" valign="top"><h3>Data & messaging</h3><p><code>PostgreSQL</code> <code>Redis</code> <code>RabbitMQ</code> <code>MongoDB</code> <code>SQLite</code> <code>Kafka</code> <code>S3</code> <code>MinIO</code></p><p>Оптимизация SQL, проектирование схем, миграции, очереди и событийные интеграции.</p></td></tr>
+  <tr><td valign="top"><h3>Frontend & product</h3><p><code>React</code> <code>Next.js</code> <code>Angular</code> <code>JavaScript</code> <code>Vite</code> <code>Tailwind</code> <code>Phaser</code> <code>Three.js</code> <code>Figma</code></p><p>От лендингов и кабинетов до браузерных игр и full-stack прототипов.</p></td><td valign="top"><h3>AI & automation</h3><p><code>OpenAI</code> <code>Claude / Anthropic</code> <code>Ollama</code> <code>Llama</code> <code>Qwen</code> <code>DeepSeek</code> <code>Whisper</code> <code>STT / TTS</code></p><p>RAG, гибридный поиск, evals, prompt engineering, anti-hallucination и multi-agent orchestration.</p></td></tr>
+  <tr><td valign="top"><h3>DevOps & delivery</h3><p><code>Docker</code> <code>Docker Swarm</code> <code>Dokploy</code> <code>GitHub Actions</code> <code>GitLab CI/CD</code> <code>Cloudflare</code> <code>Nginx</code> <code>VPS</code> <code>Kubernetes</code></p></td><td valign="top"><h3>Quality & integrations</h3><p><code>Jest</code> <code>Playwright</code> <code>Cypress</code> <code>Postman</code> <code>Telegram bots</code> <code>ЮKassa</code> <code>Т-Банк</code> <code>Python</code> <code>Go</code></p></td></tr>
+</table>
 
-### **Other**  
-![Telegram Bots](https://img.shields.io/badge/Telegram%20Bot-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)
+## Избранные направления
+
+- **AI-продукты и SaaS:** СметаКП, Reply Desk, AI-фабрика и виртуальный офис агентов.
+- **Инженерные инструменты:** `nestjs-ddd-cli`, шаблоны микросервисов, backend-модули и автоматизация delivery.
+- **Продуктовая разработка:** от идеи и доменной модели до платежей, аналитики и деплоя.
+
+## GitHub статистика
+
+Статистика строится внутри репозитория GitHub Actions и сохраняется локально в SVG. Поэтому профиль не зависит от `github-readme-stats.vercel.app`, который периодически недоступен.
+
+<p align="center"><img src="./assets/profile-stats.svg" alt="GitHub статистика Дмитрия" /></p>
+
+## Проекты
+
+<p align="center"><img src="./assets/project-stats.svg" alt="Статистика проектов Дмитрия" /></p>
+
+## GitHub Skyline
+
+<p align="center"><a href="https://git-skyline.huakun.tech/contribution/github/mogilevtsevdmitry/embed?enableZoom=false&autoRotate=true"><img src="./assets/skyline.png" alt="GitHub Skyline" /></a></p>
+<p align="center"><sub>Нажмите на изображение для интерактивного просмотра.</sub></p>
 
 ---
 
-## 📊 GitHub Статистика  
-
-<table>
-  <tr>
-    <td>
-      <img src="https://github-readme-stats.vercel.app/api?username=mogilevtsevdmitry&show_icons=true&theme=dark" />
-    </td>
-    <td>
-      <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=mogilevtsevdmitry&layout=compact&theme=dark" />
-    </td>
-  </tr>
-</table>
-
-## GitHub SkyLine
-[![GitHub Skyline](./assets/skyline.png)](https://git-skyline.huakun.tech/contribution/github/mogilevtsevdmitry/embed?enableZoom=false&autoRotate=true)
-*Нажмите на изображение для интерактивного просмотра*
+<div align="center"><sub>Открыт к продуктовым задачам, AI-интеграциям и сложному backend. Связь: <a href="https://t.me/mogilevtsevdmitry">@mogilevtsevdmitry</a></sub></div>
